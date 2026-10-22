@@ -1,6 +1,6 @@
 {
   "name": "shapes",
-  "description": "Polytope quaternion renderer",
+  "description": "Polytope compositor",
   "version": "0.0.0",
   "author": "Nate Goldman <ungoldman@gmail.com>",
   "bugs": {
