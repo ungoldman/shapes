@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SHAPES</title>
+<meta name="description" content="Geometry for the worried mind">
+<meta name="theme-color" content="#000">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SHAPES">
+<meta property="og:description" content="Geometry for the worried mind">
+<meta property="og:url" content="https://ungoldman.com/shape-rotator/">
+<meta property="og:image" content="https://ungoldman.com/shape-rotator/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="A truncated icosahedron with pastel faces on a black field">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  /* palette and type follow ungoldman.com: black field, monospace readout.
+     The light theme swaps the same tokens, from the OS setting until the
+     bulb picks one. */
+  :root {
+    color-scheme: dark;
+    --bg: #000;
+    --panel-bg: #0b0b0d;
+    --fg: #e9eaee;
+    --dim: #9aa0ab;
+    --rule: rgba(255, 255, 255, 0.28);
+    --hover: rgba(255, 255, 255, 0.12);
+    --pressed: rgba(255, 255, 255, 0.18);
+    --glow: rgba(255, 255, 255, 0.6);
+    --focus: rgba(255, 255, 255, 0.5);
+    --edge: rgba(255, 255, 255, 0.16);
+    /* backlit: light spills from behind the shape's edges */
+    --lit: drop-shadow(0 0 10px rgba(255, 255, 255, 0.11)) drop-shadow(0 0 32px rgba(130, 150, 255, 0.14));
+    /* the checker's two squares, the second half see-through */
+    --check: #34353b;
+    --check-soft: rgba(52, 53, 59, 0.45);
+    --mono: ui-monospace, Menlo, Consolas, monospace;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #f6f6f6;
+    --panel-bg: #fff;
+    --fg: #16171a;
+    --dim: #5d636e;
+    --rule: rgba(0, 0, 0, 0.25);
+    --hover: rgba(0, 0, 0, 0.07);
+    --pressed: rgba(0, 0, 0, 0.12);
+    --glow: rgba(0, 0, 0, 0.2);
+    --focus: rgba(0, 0, 0, 0.5);
+    --edge: rgba(0, 0, 0, 0.16);
+    /* lit from above: a soft shadow falls below the shape */
+    --lit: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.12)) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.06));
+    --check: #cfd0d4;
+    --check-soft: rgba(207, 208, 212, 0.45);
+  }
+  /* a quick second tap is a second press, never a zoom */
+  html { touch-action: manipulation; }
+  body {
+    box-sizing: border-box;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0 16px;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font: 13px/1.4 var(--mono);
+  }
+  #canvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    filter: var(--lit);
+  }
+  #canvas:active { cursor: grabbing; }
+  header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0;
+  }
+  header .rule,
+  #credits h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    align-self: center;
+    background: linear-gradient(90deg, var(--rule), transparent);
+  }
+  #home { display: inline-flex; align-items: center; color: var(--dim); text-decoration: none; }
+  #home:hover, #home:focus-visible { color: var(--fg); }
+  h1 { margin: 0; font-size: 1.2rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; }
+  #menus, #controls { display: flex; gap: 6px; }
+  select {
+    height: 32px;
+    padding: 0 8px;
+    font: inherit;
+    letter-spacing: 0.04em;
+    color: var(--fg);
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  /* the shape's numbers, read live, in the corner on a wide screen */
+  #readout {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    margin: 0;
+    display: grid;
+    gap: 2px;
+    color: var(--dim);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
+    white-space: pre;
+    pointer-events: none;
+    /* halo so the numbers stay legible over a zoomed shape */
+    text-shadow: 0 0 3px var(--bg), 0 0 8px var(--bg);
+  }
+  #readout-name { color: var(--fg); font-size: 13px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+  button {
+    font: inherit;
+    letter-spacing: inherit;
+    color: var(--fg);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: background 0.2s, text-shadow 0.2s;
+  }
+  #controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 15px;
+    line-height: 1;
+  }
+  button.small { font-size: 10px; padding: 1px 8px; }
+  button[aria-pressed="true"] { background: var(--pressed); }
+  button:hover,
+  button:focus-visible { background: var(--hover); text-shadow: 0 0 12px var(--glow); }
+  :focus-visible { outline: 1px solid var(--focus); outline-offset: 2px; }
+  #credits {
+    box-sizing: border-box;
+    width: min(480px, calc(100vw - 32px));
+    max-height: 82dvh;
+    padding: 16px 20px;
+    overflow-y: auto;
+    color: var(--fg);
+    background: var(--panel-bg);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    font: 12px/1.5 var(--mono);
+  }
+  #credits::backdrop { background: rgba(0, 0, 0, 0.6); }
+  #credits h2 { display: flex; gap: 10px; align-items: center; margin: 0 0 10px; font-size: 1rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+  #credits h2 button { order: 1; }
+  #credits h3 { margin: 14px 0 6px; font-size: 10px; font-weight: 400; letter-spacing: 0.3em; text-transform: uppercase; color: var(--dim); }
+  #credits p, #credits li { margin: 0 0 8px; color: var(--dim); }
+  #credits ul { margin: 0; padding: 0 0 0 2ch; }
+  #credits b { font-weight: 600; color: var(--fg); }
+  #credits code { color: var(--fg); }
+  #credits a { color: var(--fg); text-underline-offset: 2px; }
+  #keys { border-collapse: collapse; color: var(--dim); }
+  #glossary { margin: 0; }
+  #glossary dt { color: var(--fg); }
+  #glossary dd { margin: 0 0 6px 2ch; color: var(--dim); }
+  #keys th { padding: 2px 2ch 2px 0; font-weight: 400; text-align: left; }
+  kbd { white-space: nowrap; }
+  #keys td { padding: 2px 0; }
+  kbd { font: 11px var(--mono); color: var(--fg); border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; }
+  /* A phone keeps the title up top and moves the menus and buttons to a dock
+     at the bottom, in reach of a thumb and clear of the home indicator. */
+  @media (max-width: 600px) {
+    h1 { font-size: 1rem; }
+    /* under the header, clear of a shape that fills a short window */
+    #readout { top: 52px; bottom: auto; }
+    #menus {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: calc(68px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0 16px;
+    }
+    #menus select { min-width: 0; }
+    #controls {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    }
+  }
+  /* fingers need bigger targets than a cursor does */
+  @media (pointer: coarse) {
+    #controls button { width: 44px; height: 44px; font-size: 18px; }
+    select { height: 40px; }
+    button.small { min-height: 30px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button { transition: none; }
+  }
+</style>
+
+<canvas id="canvas" aria-label="A spinning shape, press and drag to rotate it"></canvas>
+
+<header>
+  <a id="home" href="/" title="index" aria-label="back to index">&#8617;</a>
+  <h1>Shapes</h1>
+  <span class="rule"></span>
+  <div id="menus">
+    <select id="shape" aria-label="Shape" title="Shape ([ and ])"></select>
+    <select id="effect" aria-label="Effect" title="Effect (, and .)"></select>
+  </div>
+  <nav id="controls" aria-label="Controls">
+    <button data-action="reroll" title="Reroll (R)" aria-label="Reroll">&#9860;&#xFE0E;</button>
+    <button data-action="pause" title="Pause (Space)" aria-label="Pause" aria-pressed="false">&#10073;&#10073;</button>
+    <button data-action="light" title="Lights (L)" aria-label="Light mode" aria-pressed="false">&#9680;&#xFE0E;</button>
+    <button popovertarget="credits" title="About (I)" aria-label="About">?</button>
+  </nav>
+</header>
+
+<p id="readout" aria-live="off">
+  <span id="readout-name"></span>
+  <span id="readout-counts"></span>
+  <span id="readout-turn"></span>
+  <span id="readout-effect"></span>
+  <span id="readout-note"></span>
+</p>
+
+<div id="credits" popover>
+  <h2>Shapes <button class="small" popovertarget="credits" popovertargetaction="hide">Close</button></h2>
+  <p>Life getting you down? Calm your nerves with the soothing power of shapes.</p>
+
+  <h3>Controls</h3>
+  <table id="keys">
+    <tr><th scope="row">hold <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or drag</th><td>steer</td></tr>
+    <tr><th scope="row">hold <kbd>Q</kbd> <kbd>E</kbd></th><td>roll counterclockwise or clockwise</td></tr>
+    <tr><th scope="row">wheel, pinch, <kbd>+</kbd> <kbd>&minus;</kbd></th><td>zoom</td></tr>
+    <tr><th scope="row"><kbd>[</kbd> <kbd>]</kbd></th><td>previous or next shape</td></tr>
+    <tr><th scope="row"><kbd>,</kbd> <kbd>.</kbd></th><td>previous or next effect</td></tr>
+    <tr><th scope="row"><kbd>R</kbd></th><td>reroll</td></tr>
+    <tr><th scope="row"><kbd>Space</kbd></th><td>pause</td></tr>
+    <tr><th scope="row"><kbd>L</kbd></th><td>lights</td></tr>
+    <tr><th scope="row"><kbd>I</kbd></th><td>this panel</td></tr>
+  </table>
+
+  <h3>Effects</h3>
+  <p>A canvas has no sense of depth. It paints each new shape over what is already there. Showing which face is in front is up to the program.</p>
+  <ul>
+    <li><b>Wireframe.</b> Only the edges. Edges on the far side are dashed.</li>
+    <li><b>Solid.</b> Faces turned away from you are skipped. The rest are painted far to near so near faces cover far ones. This is the <a href="https://en.wikipedia.org/wiki/Painter%27s_algorithm">painter's algorithm</a>. Each face is lit by how squarely it faces the light (<a href="https://en.wikipedia.org/wiki/Lambertian_reflectance">Lambert</a> shading). A surface open on both sides shows its back in a second color. On the M&ouml;bius strip and the Klein bottle the color flips along a line. That line is where front and back meet, because these surfaces have only one side.</li>
+    <li><b>One op.</b> Faces are painted far to near. Every face mixes with the faces behind it through the same composite operation.</li>
+    <li><b>Mixed ops.</b> Faces are painted in the order the shape lists them. Nothing checks which face is nearer. A face at the back can land on top of one at the front. Each face mixes with the paint below it through its own <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation">composite operation</a>. Ops that clear the canvas only go to the first 26 faces. Otherwise the last face would clear the rest.</li>
+  </ul>
+  <p>Seven ops need something underneath to act on: source-in, source-out, source-atop, destination-in, destination-out, destination-atop, copy. On an empty canvas they draw nothing or just the plain shape. So a checkerboard is drawn inside the shape's outline first. Faces are pulled in a little so the checkerboard shows between them.</p>
+
+  <h3>Math</h3>
+  <ul>
+    <li>Orientation is one unit <a href="https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation">quaternion</a> renormalized every frame.</li>
+    <li>Projection is <code>x &times; f / (d + z)</code> with the eye 6 units back.</li>
+    <li><a href="https://en.wikipedia.org/wiki/Euler_characteristic">Euler characteristic</a> <code>&chi; = V &minus; E + F</code>. Sphere-like shapes give 2. The flat triangle gives 1. The torus, the trefoil knot, and the M&ouml;bius strip give 0.</li>
+    <li>The hypercube and the 16-cell turn in 4D and are projected to 3D in perspective. They are drawn as their squares and triangles. The hypercube gives 8 and the 16-cell 16. Subtract their cells for 0.</li>
+    <li>The Klein bottle gives 0 like the torus but has one side. The Enneper surface is a disk and gives 1. The double torus has two holes and gives &minus;2.</li>
+    <li>The dodecahedron is the dual of the icosahedron. The geodesic sphere is the icosahedron split twice. The other convex shapes come from a convex hull of their corners.</li>
+  </ul>
+
+  <h3>Glossary</h3>
+  <dl id="glossary">
+    <dt>Composite operation</dt>
+    <dd>The rule for mixing a new drawing with what the canvas already holds. The canvas has 26.</dd>
+    <dt>Source</dt>
+    <dd>What is being drawn now. Here a face or the whole shape.</dd>
+    <dt>Destination</dt>
+    <dd>What the canvas holds before the source lands.</dd>
+    <dt>Alpha</dt>
+    <dd>How opaque a pixel is. 0 is clear. 1 is solid.</dd>
+    <dt>Porter-Duff ops</dt>
+    <dd>The source and destination ops plus xor, copy, and lighter. They decide which pixels survive by alpha alone. Named for the 1984 paper by Porter and Duff that set them out: <a href="https://doi.org/10.1145/964965.808606">Compositing Digital Images</a>.</dd>
+    <dt>Blend modes</dt>
+    <dd>Multiply through luminosity. They mix the colors where source and destination overlap.</dd>
+    <dt>Vertex, edge, face</dt>
+    <dd>A corner, the line between two corners, and a flat polygon bounded by edges.</dd>
+    <dt>Culling</dt>
+    <dd>Skipping faces that point away from the eye.</dd>
+    <dt>Painter's algorithm</dt>
+    <dd>Drawing far faces first so near ones cover them.</dd>
+    <dt>Perspective</dt>
+    <dd>Dividing by depth so far points crowd toward the middle.</dd>
+    <dt>Quaternion</dt>
+    <dd>Four numbers that hold a rotation without drift or gimbal lock.</dd>
+  </dl>
+
+  <h3>Credits</h3>
+  <p>Original rotation adapted from a <a href="https://gist.github.com/thomasdarimont/8c694b4522c6cb10d85c">gist</a> by Thomas Darimont.</p>
+  <p><a href="https://github.com/ungoldman/shape-rotator">Source</a>. Public domain (<a href="https://spdx.org/licenses/CC0-1.0.html">CC0-1.0</a>).</p>
+
+  <h3>AI disclosure</h3>
+  <p>Original experiment written 2022. Reworked on October 21st 2026 with Claude Code (Opus 5.5).</p>
+</div>
+
+<script type="module" src="app.js"></script>
+</html>
