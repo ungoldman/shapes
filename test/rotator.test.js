@@ -324,9 +324,6 @@ test('keys and actions are event codes', () => {
   assert.equal(EFFECTS.at(-1), 'mixed')
   assert.ok(UNSEEN.every((op) => OPS.includes(op)))
   assert.deepEqual(new Set(CARDED), new Set([...UNSEEN, ...WIPES]))
-  assert.deepEqual(
-    Object.keys(NOTES).sort(),
-    EFFECTS.filter((e) => e !== 'solid' && e !== 'wire').sort()
-  )
+  assert.deepEqual(Object.keys(NOTES).sort(), [...EFFECTS].sort())
   for (const note of Object.values(NOTES)) assert.ok(!note.includes(',') && note.length <= 56, note)
 })

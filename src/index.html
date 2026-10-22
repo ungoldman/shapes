@@ -272,7 +272,7 @@
     <li><b>One op.</b> Faces are painted far to near. Every face mixes with the faces behind it through the same composite operation.</li>
     <li><b>Mixed ops.</b> Faces are painted in the order the shape lists them. Nothing checks which face is nearer. A face at the back can land on top of one at the front. Each face mixes with the paint below it through its own <a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation">composite operation</a>. Ops that clear the canvas only go to the first 26 faces. Otherwise the last face would clear the rest.</li>
   </ul>
-  <p>Seven ops need something underneath to act on: source-in, source-out, source-atop, destination-in, destination-out, destination-atop, copy. On an empty canvas they draw nothing or just the plain shape. So a checkerboard is drawn inside the shape's outline first. Faces are pulled in a little so the checkerboard shows between them.</p>
+  <p>Seven ops need a destination to act on: source-in, source-out, source-atop, destination-in, destination-out, destination-atop, copy. On empty canvas they draw nothing or plain shape. These draw onto gray transparency grid filled inside shape's outline. Faces are inset so grid shows between them.</p>
 
   <h3>Math</h3>
   <ul>
