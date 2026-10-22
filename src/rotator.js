@@ -133,12 +133,12 @@ export const ACTIONS = {
 export const UNSEEN = ['source-in', 'source-atop', 'destination-in', 'destination-out']
 // ops drawn over the transparency grid: the unseen ones, and the wipes,
 // which face over face would leave only the last face
-export const CARDED = [...new Set([...UNSEEN, ...WIPES])]
+export const GRIDDED = [...new Set([...UNSEEN, ...WIPES])]
 
 // in menu order
 export const EFFECTS = ['wire', 'solid', ...OPS, 'mixed']
 
-// Single ops draw face over face, far to near, except CARDED ones, which
+// Single ops draw face over face, far to near, except GRIDDED ones, which
 // draw the whole shape over the grid at once.
 export const NOTES = {
   wire: 'edges only with hidden ones dashed',

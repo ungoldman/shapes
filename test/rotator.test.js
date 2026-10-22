@@ -7,7 +7,6 @@ import {
   apply,
   approach,
   axisAngle,
-  CARDED,
   CRUISE,
   DOUBLE,
   DRAG,
@@ -17,6 +16,7 @@ import {
   EFFECTS,
   FLING,
   fling,
+  GRIDDED,
   HARMONIES,
   HUE_JITTER,
   IDENTITY,
@@ -323,7 +323,7 @@ test('keys and actions are event codes', () => {
   assert.deepEqual(EFFECTS.slice(2, -1), OPS)
   assert.equal(EFFECTS.at(-1), 'mixed')
   assert.ok(UNSEEN.every((op) => OPS.includes(op)))
-  assert.deepEqual(new Set(CARDED), new Set([...UNSEEN, ...WIPES]))
+  assert.deepEqual(new Set(GRIDDED), new Set([...UNSEEN, ...WIPES]))
   assert.deepEqual(Object.keys(NOTES).sort(), [...EFFECTS].sort())
   for (const note of Object.values(NOTES)) assert.ok(!note.includes(',') && note.length <= 56, note)
 })

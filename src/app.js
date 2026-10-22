@@ -4,13 +4,13 @@ import {
   apply,
   approach,
   axisAngle,
-  CARDED,
   DISTANCE,
   DRAG,
   drift,
   EFFECT_KEYS,
   EFFECTS,
   fling,
+  GRIDDED,
   IDENTITY,
   KEYS,
   NOTES,
@@ -118,19 +118,19 @@ const held = new Set()
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 const toward = (from, to) => [to[0] - from[0], to[1] - from[1], to[2] - from[2]]
 
-// The transparency grid the CARDED ops act on, since on an empty canvas
+// The transparency grid the GRIDDED ops act on, since on an empty canvas
 // they draw nothing or only the plain shape. Two grays, the second half
 // see-through so the ops still have alpha to act on, clipped to the shape's
 // outline.
-const card = document.createElement('canvas')
+const grid = document.createElement('canvas')
 
-function paintCard(dpr) {
-  card.width = canvas.width
-  card.height = canvas.height
-  const c = card.getContext('2d')
+function paintGrid(dpr) {
+  grid.width = canvas.width
+  grid.height = canvas.height
+  const c = grid.getContext('2d')
   const cell = CHECK * dpr
-  for (let row = 0; row * cell < card.height; row++) {
-    for (let col = 0; col * cell < card.width; col++) {
+  for (let row = 0; row * cell < grid.height; row++) {
+    for (let col = 0; col * cell < grid.width; col++) {
       c.fillStyle = (row + col) % 2 ? ink.checkSoft : ink.check
       c.fillRect(Math.round(col * cell), Math.round(row * cell), Math.ceil(cell), Math.ceil(cell))
     }
@@ -162,7 +162,7 @@ function resize() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
   layer.width = canvas.width
   layer.height = canvas.height
-  paintCard(dpr)
+  paintGrid(dpr)
   fadeStart = -Infinity
   growStart = -Infinity
 }
@@ -260,7 +260,7 @@ function drawOne(points, world, op) {
   }
   ctx.clip()
   ctx.setTransform(1, 0, 0, 1, 0, 0)
-  ctx.drawImage(card, 0, 0)
+  ctx.drawImage(grid, 0, 0)
   ctx.restore()
   layerCtx.setTransform(1, 0, 0, 1, 0, 0)
   layerCtx.clearRect(0, 0, layer.width, layer.height)
@@ -320,7 +320,7 @@ function draw(now) {
   if (effect === 'solid') drawSolid(ctx, points, world, false, false)
   else if (effect === 'wire') drawWire(points, world)
   else if (effect === 'mixed') drawOps(points)
-  else if (CARDED.includes(effect)) drawOne(points, world, effect)
+  else if (GRIDDED.includes(effect)) drawOne(points, world, effect)
   else drawFaces(points, world, effect)
   if (t < 1) {
     ctx.save()
@@ -466,7 +466,7 @@ function setTheme(theme, save) {
     checkSoft: token('--check-soft')
   }
   // the grid follows the theme
-  if (width) paintCard(window.devicePixelRatio || 1)
+  if (width) paintGrid(window.devicePixelRatio || 1)
   if (!save) return
   try {
     localStorage.setItem(THEME_KEY, theme)
