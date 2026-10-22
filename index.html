@@ -7,7 +7,6 @@
   <title>SHAPE ROTATOR</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" sizes="any">
   <link rel="stylesheet" href="https://ungoldman.com/style.css/site.css">
-  <link rel="stylesheet" href="https://ungoldman.com/index.css">
   <style>
     html, body {
       height: 100vh;
@@ -21,7 +20,17 @@
     }
     .top-bar {
       position: sticky;
+      top: 0;
       z-index: 1;
+    }
+    .right {
+      float: right;
+      font-size: 1rem;
+      opacity: 0.5;
+    }
+    .right:hover {
+      opacity: 0.9;
+      text-decoration: none;
     }
     #canvas {
       position: fixed;
