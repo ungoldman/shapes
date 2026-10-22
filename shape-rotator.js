@@ -312,8 +312,8 @@ function controls () {
   const dark = window.matchMedia('(prefers-color-scheme: dark)').matches
   let bg = window.localStorage.getItem('shape-rotator-bg')
 
-  if (bg) h.classList.add(bg)
-  if (!bg && dark) bg = 'dark'
+  if (!bg) bg = dark ? 'dark' : 'light'
+  h.classList.add(bg)
 
   function toggleLight () {
     if (bg === 'dark') day()
