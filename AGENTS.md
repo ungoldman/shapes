@@ -5,7 +5,7 @@
 - test: `npm test`, `npm run coverage`
 - format: `npm run format`
 
-Node 22.12+. Do not alter version. Push to `main` deploys https://ungoldman.com/shape-rotator via `pages.yml`.
+Node 22.12+. Do not alter version. Push to `main` deploys https://ungoldman.com/shapes via `pages.yml`.
 
 ## Conventions
 
