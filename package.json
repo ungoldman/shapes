@@ -1,0 +1,22 @@
+{
+  "name": "shape-rotator",
+  "description": "Geometry for the worried mind",
+  "version": "0.0.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.15",
+    "fast-check": "^4.10.2"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "license": "CC0-1.0",
+  "private": true,
+  "scripts": {
+    "coverage": "node --test --experimental-test-coverage --test-coverage-exclude='test/**' --test-coverage-exclude='src/start.js' --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 test/*.test.js",
+    "format": "biome check --write .",
+    "lint": "biome check .",
+    "start": "node src/start.js",
+    "test": "npm run lint && node --test test/*.test.js"
+  },
+  "type": "module"
+}
