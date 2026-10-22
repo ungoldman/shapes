@@ -62,7 +62,7 @@ const size = (v) => Math.hypot(...v)
 const times = (v, k) => v.map((c) => c * k)
 export const STILL = Object.freeze([0, 0, 0])
 
-// true when v is moving along unit direction dir
+// v within about 37° of unit direction dir
 export function aligned(v, dir) {
   const n = size(v)
   return n > 0 && v.reduce((s, c, i) => s + c * dir[i], 0) / n > 0.8
@@ -107,7 +107,6 @@ export function unit(v) {
   return n ? times(v, 1 / n) : v.map(() => 0)
 }
 
-// shape and effect steps back and forward
 export const SHAPE_KEYS = {
   BracketLeft: -1,
   BracketRight: 1
@@ -132,16 +131,15 @@ export const ACTIONS = {
 
 // ops that draw nothing on an empty canvas
 export const UNSEEN = ['source-in', 'source-atop', 'destination-in', 'destination-out']
-// ops shown against a card: the unseen ones, and the wipes, which face over
-// face would leave only the last face
+// ops drawn over the transparency grid: the unseen ones, and the wipes,
+// which face over face would leave only the last face
 export const CARDED = [...new Set([...UNSEEN, ...WIPES])]
 
-// how faces are drawn, in menu order: wireframe, solid, one op for every
-// face, or every op mixed
+// in menu order
 export const EFFECTS = ['wire', 'solid', ...OPS, 'mixed']
 
-// a line on each effect whose name does not say it. Most single ops draw
-// face over face, far to near. The CARDED ones draw the whole shape over a card.
+// Single ops draw face over face, far to near, except CARDED ones, which
+// draw the whole shape over the grid at once.
 export const NOTES = {
   wire: 'edges only with hidden ones dashed',
   solid: 'faces shaded by angle to light',
@@ -277,11 +275,10 @@ export const HARMONIES = {
   rainbow: Array.from({ length: 12 }, (_, i) => i * 30)
 }
 
-// A stroke, a fill and its opaque twin, and a composite op for each of n
-// faces, all from one harmony around a base hue, which the shaded modes use.
-// OKLCH keeps lightness and chroma even from hue to hue. Ops run through
-// every one before any repeats. After the first 26 the wipes sit out, or on
-// a shape with many faces the last wipe would leave one face standing.
+// Stroke, fill, opaque fill, and op per face, from one harmony around a base
+// hue. OKLCH keeps lightness and chroma even across hues. Ops all run before
+// any repeats. After the first 26 the wipes sit out, or on a many-faced shape
+// the last wipe would leave one face standing.
 export function roll(n, random = Math.random) {
   const hue = Math.floor(random() * 360)
   const names = Object.keys(HARMONIES)

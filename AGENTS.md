@@ -23,5 +23,5 @@ Node 22.12+. Do not alter version. Push to `main` deploys https://ungoldman.com/
 - `src/shapes.js`: the eight shapes as vertices and outward-wound faces, their edges, V E F and Euler characteristic. No DOM.
 - `src/sculpt.js`: smooth union of distance fields and a marching tetrahedra mesher. No DOM.
 - `src/rotator.js`: quaternion orientation, projection and zoom, gesture settling (tap, double tap, speed-up), color and op rolls, effects and their notes, key map. No DOM.
-- `src/app.js`: canvas, checkerboard, effects, crossfade, readout, steering from keys and touch, pinch, wheel, theme. Keys match `event.code`.
+- `src/app.js`: canvas, transparency grid, effects, crossfade, readout, steering from keys and touch, pinch, wheel, theme. Keys match `event.code`.
 - `src/server.js`, `src/start.js`: dev server.

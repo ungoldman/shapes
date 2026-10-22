@@ -46,8 +46,8 @@ const MORPH = 0.0006
 // degrees round the wheel from a surface's front hue to its back one
 const BACK_HUE = 150
 const GROW = 0.88
-// css px per square of the card's checker, and the share of each face pulled
-// in from its edges where the card shows through
+// css px per square of the transparency grid, and the share of each face
+// pulled in from its edges where the grid shows through
 const CHECK = 8
 const INSET = 0.1
 // ms between steps while R, [, ], comma, period, or the dice is held, long
@@ -118,10 +118,10 @@ const held = new Set()
 const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
 const toward = (from, to) => [to[0] - from[0], to[1] - from[1], to[2] - from[2]]
 
-// The card the CARDED ops act on, since on an empty canvas they draw
-// nothing or only the plain shape. A transparency checker in two grays, the
-// second half see-through so the ops still have alpha to act on, clipped to
-// the shape's outline.
+// The transparency grid the CARDED ops act on, since on an empty canvas
+// they draw nothing or only the plain shape. Two grays, the second half
+// see-through so the ops still have alpha to act on, clipped to the shape's
+// outline.
 const card = document.createElement('canvas')
 
 function paintCard(dpr) {
@@ -173,8 +173,7 @@ function path(g, points, face) {
   g.closePath()
 }
 
-// The original look: every face in a fixed order, no hiding, each composited
-// onto what is already drawn with its own op.
+// faces in list order with no culling or depth sort, each with its own op
 function drawOps(points) {
   shape.faces.forEach((face, i) => {
     const { stroke, fill, op } = faces[i]
@@ -188,7 +187,6 @@ function drawOps(points) {
   })
 }
 
-// each face's normal, center, and whether it faces the eye
 function survey(world) {
   return shape.faces.map((face, i) => {
     const corners = face.map((v) => world[v])
@@ -198,15 +196,13 @@ function survey(world) {
   })
 }
 
-// Back faces culled, the rest painted far to near. One hue lit by how
-// squarely each face meets the light, or each face its rolled color unlit.
+// back faces culled unless two-sided, the rest far to near
 function visible(world) {
   return survey(world)
     .filter((f) => shape.twoSided || f.front)
     .sort((a, b) => b.c[2] - a.c[2])
 }
 
-// a face's corners pulled toward its middle by INSET
 function inset(points, face) {
   const mid = [0, 1].map((k) => face.reduce((sum, i) => sum + points[i][k], 0) / face.length)
   return face.map((i) => [0, 1].map((k) => points[i][k] + (mid[k] - points[i][k]) * INSET))
@@ -232,8 +228,8 @@ function drawSolid(g, points, world, colorful, shrink) {
   }
 }
 
-// One op over the card: the whole shape drawn solid on its own layer, then
-// composited onto the card at once, so the op reads as shape against card.
+// One op over the grid: the whole shape drawn solid on its own layer, then
+// composited onto the grid at once, so the op reads as shape against grid.
 const layer = document.createElement('canvas')
 const layerCtx = layer.getContext('2d')
 
@@ -269,7 +265,7 @@ function drawOne(points, world, op) {
   layerCtx.setTransform(1, 0, 0, 1, 0, 0)
   layerCtx.clearRect(0, 0, layer.width, layer.height)
   layerCtx.setTransform(ctx.getTransform())
-  // pulled in from the edges where there is a card, so it shows between faces
+  // pulled in from the edges over the grid, so it shows between faces
   drawSolid(layerCtx, points, world, true, true)
   ctx.save()
   ctx.setTransform(1, 0, 0, 1, 0, 0)
@@ -278,8 +274,7 @@ function drawOne(points, world, op) {
   ctx.restore()
 }
 
-// Every edge, the ones behind the shape dashed and faint.
-// Every edge, the ones behind the shape dashed and faint.
+// edges behind the shape dashed and faint
 function drawWire(points, world) {
   const front = survey(world).map((f) => f.front)
   const seen = ([, , beside]) => shape.twoSided || beside.some((f) => front[f])
@@ -404,10 +399,9 @@ function finish(before, gesture) {
   showPaused()
 }
 
-// held, R and M keep going, slow enough to take each one in
+// actions that repeat while held
 const CYCLES = ['reroll']
 
-// do it once, then again every CYCLE_EVERY ms until the key or button lets go
 function startCycle(name = 'reroll') {
   stopCycle()
   const step = typeof name === 'function' ? name : actions[name]
@@ -420,7 +414,7 @@ function stepEffect(by) {
   setEffect(EFFECTS[(EFFECTS.indexOf(effect) + by + n) % n])
 }
 
-// a hand picking a shape cuts straight to it. Only a reroll animates.
+// picking a shape by hand cuts straight to it. Only reroll animates.
 function stepShape(by) {
   const n = SHAPES.length
   pick((SHAPES.indexOf(shape) + by + n) % n, false)
@@ -471,7 +465,7 @@ function setTheme(theme, save) {
     check: token('--check'),
     checkSoft: token('--check-soft')
   }
-  // the checker follows the theme
+  // the grid follows the theme
   if (width) paintCard(window.devicePixelRatio || 1)
   if (!save) return
   try {
@@ -556,8 +550,7 @@ function spread() {
   return Math.hypot(a[0] - b[0], a[1] - b[1])
 }
 
-// Down takes hold, a drag steers, and letting go mid-drag flings the shape
-// on at the speed it was moving.
+// down takes hold, drag steers, letting go mid-drag flings
 canvas.addEventListener('pointerdown', (event) => {
   canvas.setPointerCapture(event.pointerId)
   pointers.set(event.pointerId, [event.clientX, event.clientY])

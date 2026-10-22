@@ -16,9 +16,8 @@
 <meta property="og:image:alt" content="A truncated icosahedron with pastel faces on a black field">
 <meta name="twitter:card" content="summary_large_image">
 <style>
-  /* palette and type follow ungoldman.com: black field, monospace readout.
-     The light theme swaps the same tokens, from the OS setting until the
-     bulb picks one. */
+  /* palette and type follow ungoldman.com. Light theme swaps the same
+     tokens, from the OS setting until L or its button picks one. */
   :root {
     color-scheme: dark;
     --bg: #000;
@@ -33,7 +32,7 @@
     --edge: rgba(255, 255, 255, 0.16);
     /* backlit: light spills from behind the shape's edges */
     --lit: drop-shadow(0 0 10px rgba(255, 255, 255, 0.11)) drop-shadow(0 0 32px rgba(130, 150, 255, 0.14));
-    /* the checker's two squares, the second half see-through */
+    /* the transparency grid's two squares, the second half see-through */
     --check: #34353b;
     --check-soft: rgba(52, 53, 59, 0.45);
     --mono: ui-monospace, Menlo, Consolas, monospace;
@@ -183,8 +182,8 @@
   kbd { white-space: nowrap; }
   #keys td { padding: 2px 0; }
   kbd { font: 11px var(--mono); color: var(--fg); border: 1px solid var(--rule); border-radius: 3px; padding: 0 5px; }
-  /* A phone keeps the title up top and moves the menus and buttons to a dock
-     at the bottom, in reach of a thumb and clear of the home indicator. */
+  /* phone: menus and buttons dock at the bottom, in thumb reach and clear
+     of the home indicator */
   @media (max-width: 600px) {
     h1 { font-size: 1rem; }
     /* under the header, clear of a shape that fills a short window */
