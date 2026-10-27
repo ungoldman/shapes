@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
-      - run: mkdir _site && cp src/index.html src/app.js src/rotator.js src/sculpt.js src/shapes.js src/og.png _site/
+      - run: mkdir _site && cp src/index.html src/app.js src/rotator.js src/shapes.js src/og.png _site/
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
       - id: deployment

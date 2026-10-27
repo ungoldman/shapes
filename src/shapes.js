@@ -1,8 +1,6 @@
 // The shapes, each as vertices and faces. No DOM, so it runs in Node too.
 // Faces wind counterclockwise seen from outside, so a face's normal points out.
 
-import { blend, mesh } from './sculpt.js'
-
 const PHI = (1 + Math.sqrt(5)) / 2
 // circumradius every shape is scaled to, the old cube's
 const SIZE = Math.sqrt(3)
@@ -522,18 +520,6 @@ function enneper() {
   return { vertices: fit(vertices), faces, twoSided: true }
 }
 
-// two tori run together, meshed from a distance field: genus two
-function doubleTorus() {
-  const ring = (cx) => (p) => Math.hypot(Math.hypot(p[0] - cx, p[2]) - 0.75, p[1]) - 0.3
-  const { vertices, faces } = mesh(
-    blend([ring(-0.8), ring(0.8)], 0.25),
-    [-1.95, -0.45, -1.15],
-    [1.95, 0.45, 1.15],
-    0.2
-  )
-  return { vertices: fit(vertices), faces }
-}
-
 // not convex, so its faces are wound outward by construction
 function torus(major = 1.1, minor = 0.45, segments = 16, sides = 8) {
   const vertices = []
@@ -583,7 +569,6 @@ export const SHAPES = [
   ['trefoil knot', trefoil, true],
   ['klein bottle', klein, true],
   ['enneper surface', enneper, true],
-  ['double torus', doubleTorus, true],
   ['hypercube', hypercube, true],
   ['16-cell', sixteenCell, true]
 ]

@@ -6,7 +6,6 @@ const FILES = {
   '/': ['index.html', 'text/html; charset=utf-8'],
   '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
   '/rotator.js': ['rotator.js', 'text/javascript; charset=utf-8'],
-  '/sculpt.js': ['sculpt.js', 'text/javascript; charset=utf-8'],
   '/shapes.js': ['shapes.js', 'text/javascript; charset=utf-8']
 }
 

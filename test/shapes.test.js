@@ -35,8 +35,7 @@ test('everyday shapes come first, then esoteric ones, each simplest first', () =
       'möbius strip',
       'trefoil knot',
       'enneper surface',
-      'klein bottle',
-      'double torus'
+      'klein bottle'
     ]
   )
 })
@@ -49,8 +48,8 @@ test('ties fall to corners, then to name', () => {
 })
 
 test('vertex, edge, and face counts', () => {
-  // the meshed and gridded surfaces vary with their resolution, so they are left out
-  const loose = ['enneper surface', 'klein bottle', 'double torus']
+  // the gridded surfaces vary with their resolution, so they are left out
+  const loose = ['enneper surface', 'klein bottle']
   const counts = Object.fromEntries(
     SHAPES.filter((s) => !loose.includes(s.name)).map((s) => [s.name, [s.V, s.E, s.F]])
   )
@@ -89,8 +88,7 @@ test('the Euler characteristic', () => {
     hypercube: 8,
     '16-cell': 16,
     'klein bottle': 0,
-    'enneper surface': 1,
-    'double torus': -2
+    'enneper surface': 1
   }
   for (const s of SHAPES) {
     assert.equal(s.euler, odd[s.name] ?? 2, s.name)

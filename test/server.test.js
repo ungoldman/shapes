@@ -10,13 +10,12 @@ async function serve(t, port = 0) {
   return [await listen(server, port), server]
 }
 
-test('it serves the page and its four scripts', async (t) => {
+test('it serves the page and its three scripts', async (t) => {
   const [url] = await serve(t)
   for (const [path, type] of [
     ['/', 'text/html'],
     ['/app.js', 'text/javascript'],
     ['/rotator.js', 'text/javascript'],
-    ['/sculpt.js', 'text/javascript'],
     ['/shapes.js', 'text/javascript']
   ]) {
     const res = await fetch(url + path)
